@@ -1,32 +1,50 @@
-#include <Arduino.h>
 
-const int ANALOG_PIN = A0;
-const int PIN_ANALOG_MAX_VALUE = 1023;
+#include "DHT.h"
 
-const float PIN_BASE_VOLTAGE = 3.3;
-const float TENSION_DECALAGE = 500;
+#define DHTPIN 22 
+#define DHTTYPE DHT11
 
-int AnalogValue = 0;
-int MvParDegreeCelcius = 10;
-
-float PinVoltage = 0;
-float TMP36Temperature = 0;
-
-const int MS_DELAI = 1000;
-
+DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
   Serial.begin(9600);
-  pinMode(ANALOG_PIN, INPUT);
+  Serial.println(F("DHT11 test!"));
+  dht.begin();
 }
 
 void loop() {
-  AnalogValue = analogRead(ANALOG_PIN);
-  PinVoltage = (AnalogValue * PIN_BASE_VOLTAGE) / PIN_ANALOG_MAX_VALUE;
-  TMP36Temperature = (PinVoltage * 1000 - TENSION_DECALAGE) / MvParDegreeCelcius;
+  delay(10000);
+  float hum = dht.readHumidity();
+  float cel = dht.readTemperature();
+  float fhr = dht.readTemperature(true);
 
-  Serial.print(TMP36Temperature, 2); 
-  Serial.println(" ");
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(hum) || isnan(cel) || isnan(fhr)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  }
 
-  delay(MS_DELAI);
+  // Compute heat index in Fahrenheit (the default)
+  float hif = dht.computeHeatIndex(fhr, hum);
+  // Compute heat index in Celsius (isFahreheit = false)
+  float hic = dht.computeHeatIndex(cel, hum, false);
+
+  // humidity
+  Serial.print(hum);
+  Serial.print(F(", "));
+
+  // celsius
+  Serial.print(cel);
+  Serial.print(F(", "));
+
+  // fahrenheit
+  Serial.print(fhr);
+  Serial.print(F(", "));
+  
+  //heat index celsius
+  Serial.print(hic);
+  Serial.print(F(", "));
+
+  //heat index fahrenheit
+  Serial.println(hif);
 }

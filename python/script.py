@@ -9,9 +9,11 @@ try:
     while True:
         data = arduino.readline().decode().strip()
         temperature = float(data)
+        humidity = float(data)
 
         temperature_data = {
             'temperature': temperature,
+            'humidity': humidity,
         }
 
         response = requests.post(api_url, data=temperature_data)
@@ -23,4 +25,4 @@ try:
 
 except KeyboardInterrupt:
     arduino.close()
-
+r
