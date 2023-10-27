@@ -2,27 +2,30 @@ import serial
 import requests
 
 arduino = serial.Serial('COM13', 9600)  
-
 api_url = 'http://localhost:8000/api/temperature-data/'
 
 try:
     while True:
-        data = arduino.readline().decode().strip()
-        temperature = float(data)
-        humidity = float(data)
+        data = arduino.readline()
+        decoded_data = data.decode().strip() 
+        values = decoded_data.split(',')
+        
+        if len(values) >= 5:
+            humidity, celsius, fahrenheit, hic, hif = map(float, values)
+            dht11_data = {
+                'humidity': humidity,
+                'celsius': celsius,
+                'fahrenheit': fahrenheit,
+                'hic': hic,
+                'hif': hif,
+            }
 
-        temperature_data = {
-            'temperature': temperature,
-            'humidity': humidity,
-        }
+            response = requests.post(api_url, json=dht11_data)
 
-        response = requests.post(api_url, data=temperature_data)
-
-        if response.status_code == 201:
-            print(f"Data sent to Django: {temperature_data}")
-        else:
-            print(f"Failed to send data to Django: {response.status_code}")
+            if response.status_code == 201:
+                print(f"Données envoyées : {dht11_data}")
+            else:
+                print(f"Échec de l'envoi. Code d'état du serveur : {response.status_code}")
 
 except KeyboardInterrupt:
     arduino.close()
-r

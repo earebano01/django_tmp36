@@ -8,19 +8,17 @@ DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
   Serial.begin(9600);
-  Serial.println(F("DHT11 test!"));
+  // Serial.println(F("DHT11 test!"));
   dht.begin();
 }
 
 void loop() {
-  delay(10000);
   float hum = dht.readHumidity();
   float cel = dht.readTemperature();
   float fhr = dht.readTemperature(true);
 
-  // Check if any reads failed and exit early (to try again).
   if (isnan(hum) || isnan(cel) || isnan(fhr)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
+    // Serial.println(F("Failed to read from DHT sensor!"));
     return;
   }
 
@@ -47,4 +45,6 @@ void loop() {
 
   //heat index fahrenheit
   Serial.println(hif);
+  
+  delay(10000);
 }
